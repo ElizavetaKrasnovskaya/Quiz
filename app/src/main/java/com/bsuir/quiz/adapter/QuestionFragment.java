@@ -20,14 +20,12 @@ import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
-import com.anychart.charts.Pie;
-import com.anychart.core.PiePoint;
 import com.bsuir.quiz.R;
 import com.bsuir.quiz.model.Answer;
 import com.bsuir.quiz.model.Question;
 import com.bsuir.quiz.ui.PieChartActivity;
 import com.bsuir.quiz.ui.QuestionActivity;
-import com.bsuir.quiz.ui.SplashActivity;
+import com.bsuir.quiz.ui.TopicActivity;
 
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
@@ -35,7 +33,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Locale;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class QuestionFragment extends Fragment implements View.OnClickListener {
 
@@ -44,10 +41,11 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     private long timeLeftInMillis;
     private TextView timer;
     private String userAnswer;
+    private static long transitTime;
 
-    private static int correctAnswer = 0;
-    private static int wrongAnswer = 0;
-    private static int unansweredQuestion = 0;
+    private static int correctAnswer;
+    private static int wrongAnswer;
+    private static int unansweredQuestion = QuestionActivity.getAmountOfQuestions();
 
     static final String QUESTION = "QUESTION";
 
@@ -89,9 +87,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) item -> {
             switch (item.getItemId()) {
                 case R.id.statistics:
-                    PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
-                    Intent intent = new Intent(getContext(), PieChartActivity.class);
-                    startActivity(intent);
+                    completeGame();
                     return true;
                 case R.id.amount:
                     showAlertDialog();
@@ -101,6 +97,23 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             }
         });
         return view;
+    }
+
+    private void completeGame() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Want to complete the game?");
+        builder.setPositiveButton("Ok", (dialog, which) -> {
+            countDownTimer.cancel();
+            unansweredQuestion = QuestionActivity.getAmountOfQuestions() - (correctAnswer + wrongAnswer);
+            PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
+            Intent intent = new Intent(getContext(), PieChartActivity.class);
+            startActivity(intent);
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> {
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
     }
 
     @Override
@@ -227,11 +240,15 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 timeLeftInMillis = 0;
                 updateCountDownText();
                 showTrueAnswer();
-                unansweredQuestion++;
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
+                transitTime += 30000;
+                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                        || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
+                    showStatistic();
+                }
             }
         }.start();
         if (userAnswer != null) {
@@ -258,18 +275,23 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 if (firstButton.getText().equals(trueAnswer)) {
                     firstButton.setTextColor(Color.GREEN);
                     correctAnswer++;
-
                 } else {
                     firstButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                unansweredQuestion--;
                 userAnswer = firstButton.getText().toString();
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
                 countDownTimer.cancel();
+                transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
+                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                        || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
+                    showStatistic();
+                }
                 break;
             case R.id.button_2:
                 if (secondButton.getText().equals(trueAnswer)) {
@@ -279,13 +301,19 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     secondButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                unansweredQuestion--;
                 userAnswer = secondButton.getText().toString();
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
                 countDownTimer.cancel();
+                transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
+                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                        || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
+                    showStatistic();
+                }
                 break;
             case R.id.button_3:
                 if (thirdButton.getText().equals(trueAnswer)) {
@@ -295,13 +323,19 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     thirdButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                unansweredQuestion--;
                 userAnswer = thirdButton.getText().toString();
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
                 countDownTimer.cancel();
+                transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
+                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                        || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
+                    showStatistic();
+                }
                 break;
             case R.id.button_4:
                 if (fourthButton.getText().equals(trueAnswer)) {
@@ -311,20 +345,40 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     fourthButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                unansweredQuestion--;
                 userAnswer = fourthButton.getText().toString();
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
                 countDownTimer.cancel();
+                transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
+                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                        || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
+                    showStatistic();
+                }
                 break;
         }
-        if((correctAnswer + wrongAnswer + unansweredQuestion) == QuestionActivity.getAmountOfQuestions()){
+
+    }
+
+    public void showStatistic() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Want to view statistics?");
+        builder.setPositiveButton("Yes", (dialog, which) -> {
+            unansweredQuestion = QuestionActivity.getAmountOfQuestions() - (correctAnswer + wrongAnswer);
             PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
             Intent intent = new Intent(getContext(), PieChartActivity.class);
             startActivity(intent);
-        }
+        });
+        builder.setNegativeButton("No", (dialog, which) -> {
+            Intent intent = new Intent(getContext(), TopicActivity.class);
+            startActivity(intent);
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.setCanceledOnTouchOutside(false);
+        alertDialog.show();
     }
 
     private void showTrueAnswer() {
@@ -342,16 +396,24 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public static int getCorrectAnswer() {
-        return correctAnswer;
+    public static long getTransitTime() {
+        return transitTime;
     }
 
-    public static int getWrongAnswer() {
-        return wrongAnswer;
+    public static void setUnansweredQuestion(int unansweredQuestion) {
+        QuestionFragment.unansweredQuestion = unansweredQuestion;
     }
 
-    public static int getUnansweredQuestion() {
-        return unansweredQuestion;
+    public static void setCorrectAnswer(int correctAnswer) {
+        QuestionFragment.correctAnswer = correctAnswer;
+    }
+
+    public static void setWrongAnswer(int wrongAnswer) {
+        QuestionFragment.wrongAnswer = wrongAnswer;
+    }
+
+    public static void setTransitTime(long transitTime) {
+        QuestionFragment.transitTime = transitTime;
     }
 
     static class LoadImage extends AsyncTask<String, Void, Bitmap> {

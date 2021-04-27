@@ -45,10 +45,9 @@ public class TopicActivity extends AppCompatActivity {
 
         MobileAds.initialize(getApplicationContext());
         AdView adView = findViewById(R.id.adView);
-        AdRequest adRequest= new AdRequest.Builder()
+        AdRequest adRequest = new AdRequest.Builder()
                 .build();
         adView.loadAd(adRequest);
-
 
 
         ValueEventListener eventListener = new ValueEventListener() {

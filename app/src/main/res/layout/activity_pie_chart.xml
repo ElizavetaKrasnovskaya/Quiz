@@ -29,13 +29,26 @@
             android:textStyle="bold" />
     </androidx.appcompat.widget.Toolbar>
 
+    <TextView
+        android:id="@+id/transit_time"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:textSize="25sp"
+        android:background="#ffffff"
+        android:textColor="#000000"
+        app:layout_constraintBottom_toTopOf="@+id/any_chart_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
     <com.anychart.AnyChartView
         android:id="@+id/any_chart_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="#ffffff"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/transit_time" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
