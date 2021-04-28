@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.anychart.AnyChart;
 import com.anychart.AnyChartView;
@@ -40,6 +41,9 @@ public class PieChartActivity extends AppCompatActivity {
         QuestionFragment.setCorrectAnswer(amountOfAnswers[0]);
         QuestionFragment.setWrongAnswer(amountOfAnswers[1]);
         QuestionFragment.setTransitTime(transitTime);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     public void setupPieChart() {

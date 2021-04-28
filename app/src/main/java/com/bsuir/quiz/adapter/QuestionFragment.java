@@ -31,7 +31,9 @@ import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class QuestionFragment extends Fragment implements View.OnClickListener {
@@ -45,12 +47,13 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
 
     private static int correctAnswer;
     private static int wrongAnswer;
+    private static int finishTimeQuestion;
     private static int unansweredQuestion = QuestionActivity.getAmountOfQuestions();
 
     static final String QUESTION = "QUESTION";
 
     private Question question;
-    private String trueAnswer;
+    private Answer trueAnswer;
     private Button firstButton;
     private Button secondButton;
     private Button thirdButton;
@@ -76,7 +79,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             question = (Question) arguments.getSerializable(QUESTION);
             for (Answer answer : question.getAnswers()) {
                 if (answer.getValue()) {
-                    trueAnswer = answer.getName();
+                    trueAnswer = answer;
                 }
             }
             timeLeftInMillis = question.getTime();
@@ -92,11 +95,38 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 case R.id.amount:
                     showAlertDialog();
                     return true;
+                case R.id.prompt:
+                    showTwoAnswers();
                 default:
                     return super.onOptionsItemSelected(item);
             }
         });
         return view;
+    }
+
+    private void showTwoAnswers() {
+        List<Answer> answers = new ArrayList<>(question.getAnswers());
+        answers.remove(trueAnswer);
+        int randomInt = (int) (2.0 * Math.random());
+        answers.remove(answers.get(randomInt));
+        for (Answer answer : answers) {
+            if (firstButton.getText().equals(answer.getName())) {
+                firstButton.setClickable(false);
+                firstButton.setTextColor(Color.RED);
+            }
+             else if (secondButton.getText().equals(answer.getName())) {
+                secondButton.setClickable(false);
+                secondButton.setTextColor(Color.RED);
+            }
+            else if (thirdButton.getText().equals(answer.getName())) {
+                thirdButton.setClickable(false);
+                thirdButton.setTextColor(Color.RED);
+            }
+            else if (fourthButton.getText().equals(answer.getName())) {
+                fourthButton.setClickable(false);
+                fourthButton.setTextColor(Color.RED);
+            }
+        }
     }
 
     private void completeGame() {
@@ -108,10 +138,12 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
             Intent intent = new Intent(getContext(), PieChartActivity.class);
             startActivity(intent);
+            getActivity().finish();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> {
         });
         AlertDialog alertDialog = builder.create();
+
         alertDialog.setCanceledOnTouchOutside(false);
         alertDialog.show();
     }
@@ -149,18 +181,21 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     intent[0] = new Intent(getActivity(), QuestionActivity.class);
                     intent[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent[0]);
+                    getActivity().finish();
                     break;
                 case 1:
                     QuestionActivity.setAmountOfQuestions(10);
                     intent[0] = new Intent(getActivity(), QuestionActivity.class);
                     intent[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent[0]);
+                    getActivity().finish();
                     break;
                 case 2:
                     QuestionActivity.setAmountOfQuestions(15);
                     intent[0] = new Intent(getActivity(), QuestionActivity.class);
                     intent[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent[0]);
+                    getActivity().finish();
                     break;
             }
         });
@@ -185,24 +220,24 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         fourthButton.setText(question.getAnswers().get(3).getName());
 
         if (userAnswer != null) {
-            if (firstButton.getText().equals(userAnswer) && firstButton.getText().equals(trueAnswer)) {
+            if (firstButton.getText().equals(userAnswer) && firstButton.getText().equals(trueAnswer.getName())) {
                 firstButton.setTextColor(Color.GREEN);
-            } else if (firstButton.getText().equals(userAnswer) && !firstButton.getText().equals(trueAnswer)) {
+            } else if (firstButton.getText().equals(userAnswer) && !firstButton.getText().equals(trueAnswer.getName())) {
                 firstButton.setTextColor(Color.RED);
             }
-            if (secondButton.getText().equals(userAnswer) && secondButton.getText().equals(trueAnswer)) {
+            if (secondButton.getText().equals(userAnswer) && secondButton.getText().equals(trueAnswer.getName())) {
                 secondButton.setTextColor(Color.GREEN);
-            } else if (secondButton.getText().equals(userAnswer) && !secondButton.getText().equals(trueAnswer)) {
+            } else if (secondButton.getText().equals(userAnswer) && !secondButton.getText().equals(trueAnswer.getName())) {
                 secondButton.setTextColor(Color.RED);
             }
-            if (thirdButton.getText().equals(userAnswer) && thirdButton.getText().equals(trueAnswer)) {
+            if (thirdButton.getText().equals(userAnswer) && thirdButton.getText().equals(trueAnswer.getName())) {
                 thirdButton.setTextColor(Color.GREEN);
-            } else if (thirdButton.getText().equals(userAnswer) && !thirdButton.getText().equals(trueAnswer)) {
+            } else if (thirdButton.getText().equals(userAnswer) && !thirdButton.getText().equals(trueAnswer.getName())) {
                 thirdButton.setTextColor(Color.RED);
             }
-            if (fourthButton.getText().equals(userAnswer) && fourthButton.getText().equals(trueAnswer)) {
+            if (fourthButton.getText().equals(userAnswer) && fourthButton.getText().equals(trueAnswer.getName())) {
                 fourthButton.setTextColor(Color.GREEN);
-            } else if (fourthButton.getText().equals(userAnswer) && !fourthButton.getText().equals(trueAnswer)) {
+            } else if (fourthButton.getText().equals(userAnswer) && !fourthButton.getText().equals(trueAnswer.getName())) {
                 fourthButton.setTextColor(Color.RED);
             }
             countDownTimer.cancel();
@@ -240,13 +275,13 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 timeLeftInMillis = 0;
                 updateCountDownText();
                 showTrueAnswer();
+                finishTimeQuestion++;
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
                 transitTime += 30000;
-                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
-                        || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
+                if ((correctAnswer + wrongAnswer + finishTimeQuestion) == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
             }
@@ -272,13 +307,16 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_1:
-                if (firstButton.getText().equals(trueAnswer)) {
+                if (firstButton.getText().equals(trueAnswer.getName())) {
                     firstButton.setTextColor(Color.GREEN);
                     correctAnswer++;
                 } else {
                     firstButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                secondButton.setTextColor(Color.WHITE);
+                thirdButton.setTextColor(Color.WHITE);
+                fourthButton.setTextColor(Color.WHITE);
                 unansweredQuestion--;
                 userAnswer = firstButton.getText().toString();
                 firstButton.setClickable(false);
@@ -288,19 +326,22 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 countDownTimer.cancel();
                 transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
-                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                if ((correctAnswer + wrongAnswer + finishTimeQuestion) == QuestionActivity.getAmountOfQuestions()
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
                 break;
             case R.id.button_2:
-                if (secondButton.getText().equals(trueAnswer)) {
+                if (secondButton.getText().equals(trueAnswer.getName())) {
                     secondButton.setTextColor(Color.GREEN);
                     correctAnswer++;
                 } else {
                     secondButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                firstButton.setTextColor(Color.WHITE);
+                thirdButton.setTextColor(Color.WHITE);
+                fourthButton.setTextColor(Color.WHITE);
                 unansweredQuestion--;
                 userAnswer = secondButton.getText().toString();
                 firstButton.setClickable(false);
@@ -310,19 +351,22 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 countDownTimer.cancel();
                 transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
-                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                if ((correctAnswer + wrongAnswer + finishTimeQuestion) == QuestionActivity.getAmountOfQuestions()
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
                 break;
             case R.id.button_3:
-                if (thirdButton.getText().equals(trueAnswer)) {
+                if (thirdButton.getText().equals(trueAnswer.getName())) {
                     thirdButton.setTextColor(Color.GREEN);
                     correctAnswer++;
                 } else {
                     thirdButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                secondButton.setTextColor(Color.WHITE);
+                firstButton.setTextColor(Color.WHITE);
+                fourthButton.setTextColor(Color.WHITE);
                 unansweredQuestion--;
                 userAnswer = thirdButton.getText().toString();
                 firstButton.setClickable(false);
@@ -332,19 +376,22 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 countDownTimer.cancel();
                 transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
-                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                if ((correctAnswer + wrongAnswer + finishTimeQuestion) == QuestionActivity.getAmountOfQuestions()
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
                 break;
             case R.id.button_4:
-                if (fourthButton.getText().equals(trueAnswer)) {
+                if (fourthButton.getText().equals(trueAnswer.getName())) {
                     correctAnswer++;
                     fourthButton.setTextColor(Color.GREEN);
                 } else {
                     fourthButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                secondButton.setTextColor(Color.WHITE);
+                thirdButton.setTextColor(Color.WHITE);
+                firstButton.setTextColor(Color.WHITE);
                 unansweredQuestion--;
                 userAnswer = fourthButton.getText().toString();
                 firstButton.setClickable(false);
@@ -354,13 +401,12 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 countDownTimer.cancel();
                 transitTime += ((30000 - timeLeftInMillis) / 1000) * 1000 + 1000;
                 showTrueAnswer();
-                if ((correctAnswer + wrongAnswer) == QuestionActivity.getAmountOfQuestions()
+                if ((correctAnswer + wrongAnswer + finishTimeQuestion) == QuestionActivity.getAmountOfQuestions()
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
                 break;
         }
-
     }
 
     public void showStatistic() {
@@ -371,10 +417,14 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
             Intent intent = new Intent(getContext(), PieChartActivity.class);
             startActivity(intent);
+            dialog.dismiss();
+            ((QuestionActivity) getActivity()).finish();
         });
         builder.setNegativeButton("No", (dialog, which) -> {
             Intent intent = new Intent(getContext(), TopicActivity.class);
             startActivity(intent);
+            dialog.dismiss();
+            ((QuestionActivity) getActivity()).finish();
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.setCanceledOnTouchOutside(false);
@@ -382,18 +432,26 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showTrueAnswer() {
-        if (firstButton.getText().equals(trueAnswer)) {
+        if (firstButton.getText().equals(trueAnswer.getName())) {
             firstButton.setTextColor(Color.GREEN);
         }
-        if (secondButton.getText().equals(trueAnswer)) {
+        if (secondButton.getText().equals(trueAnswer.getName())) {
             secondButton.setTextColor(Color.GREEN);
         }
-        if (thirdButton.getText().equals(trueAnswer)) {
+        if (thirdButton.getText().equals(trueAnswer.getName())) {
             thirdButton.setTextColor(Color.GREEN);
         }
-        if (fourthButton.getText().equals(trueAnswer)) {
+        if (fourthButton.getText().equals(trueAnswer.getName())) {
             fourthButton.setTextColor(Color.GREEN);
         }
+    }
+
+    public static int getFinishTimeQuestion() {
+        return finishTimeQuestion;
+    }
+
+    public static void setFinishTimeQuestion(int finishTimeQuestion) {
+        QuestionFragment.finishTimeQuestion = finishTimeQuestion;
     }
 
     public static long getTransitTime() {

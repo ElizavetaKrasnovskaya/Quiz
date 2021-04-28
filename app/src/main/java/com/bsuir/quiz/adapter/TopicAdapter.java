@@ -84,6 +84,7 @@ public class TopicAdapter extends RecyclerView.Adapter<TopicAdapter.TopicViewHol
                     context.startActivity(intent[0]);
                     break;
             }
+            dialog.dismiss();
         });
         AlertDialog alert = alertDialog.create();
         alert.setCanceledOnTouchOutside(false);

@@ -61,6 +61,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, TopicActivity.class);
                         startActivity(intent);
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "Authorization failed",
                                 Toast.LENGTH_SHORT).show();
@@ -76,6 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(LoginActivity.this, TopicActivity.class);
                         startActivity(intent);
+                        finish();
                     } else {
                         Toast.makeText(LoginActivity.this, "Registration failed",
                                 Toast.LENGTH_SHORT).show();
