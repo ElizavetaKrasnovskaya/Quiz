@@ -13,4 +13,16 @@
         android:title="Statistics"
         app:showAsAction="never"/>
 
+    <item
+        android:id="@+id/prompt"
+        android:title="Prompt (2 of 4)"
+        app:showAsAction="never"
+        />
+
+    <item
+        android:id="@+id/friend"
+        android:title="Help of a friend"
+        app:showAsAction="never"
+        />
+
 </menu>

@@ -10,6 +10,7 @@ import com.bsuir.quiz.R;
 import com.bsuir.quiz.adapter.QuestionAdapter;
 import com.bsuir.quiz.adapter.QuestionFragment;
 import com.bsuir.quiz.adapter.TopicAdapter;
+import com.bsuir.quiz.model.Question;
 
 public class QuestionActivity extends AppCompatActivity {
 
@@ -23,6 +24,7 @@ public class QuestionActivity extends AppCompatActivity {
         QuestionFragment.setCorrectAnswer(0);
         QuestionFragment.setWrongAnswer(0);
         QuestionFragment.setTransitTime(0);
+        QuestionFragment.setFinishTimeQuestion(0);
 
         final QuestionAdapter[] questionAdapter = {new QuestionAdapter(getSupportFragmentManager(),
                 TopicAdapter.getSelectedTopic().getQuestions(), amountOfQuestions)};
