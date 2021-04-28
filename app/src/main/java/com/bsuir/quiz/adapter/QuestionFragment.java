@@ -108,6 +108,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
             Intent intent = new Intent(getContext(), PieChartActivity.class);
             startActivity(intent);
+            getActivity().finish();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> {
         });
@@ -149,18 +150,21 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     intent[0] = new Intent(getActivity(), QuestionActivity.class);
                     intent[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent[0]);
+                    getActivity().finish();
                     break;
                 case 1:
                     QuestionActivity.setAmountOfQuestions(10);
                     intent[0] = new Intent(getActivity(), QuestionActivity.class);
                     intent[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent[0]);
+                    getActivity().finish();
                     break;
                 case 2:
                     QuestionActivity.setAmountOfQuestions(15);
                     intent[0] = new Intent(getActivity(), QuestionActivity.class);
                     intent[0].addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     this.startActivity(intent[0]);
+                    getActivity().finish();
                     break;
             }
         });
@@ -371,10 +375,12 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             PieChartActivity.setAmountOfAnswers(new int[]{correctAnswer, wrongAnswer, unansweredQuestion});
             Intent intent = new Intent(getContext(), PieChartActivity.class);
             startActivity(intent);
+            getActivity().finish();
         });
         builder.setNegativeButton("No", (dialog, which) -> {
             Intent intent = new Intent(getContext(), TopicActivity.class);
             startActivity(intent);
+            getActivity().finish();
         });
         AlertDialog alertDialog = builder.create();
         alertDialog.setCanceledOnTouchOutside(false);

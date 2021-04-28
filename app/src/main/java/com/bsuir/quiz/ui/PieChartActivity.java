@@ -1,9 +1,11 @@
 package com.bsuir.quiz.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.anychart.AnyChart;
 import com.anychart.AnyChartView;
@@ -37,9 +39,24 @@ public class PieChartActivity extends AppCompatActivity {
         String timeFormatted = String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
         textViewTime.setText("Transit time: " + timeFormatted);
         setupPieChart();
+
         QuestionFragment.setCorrectAnswer(amountOfAnswers[0]);
         QuestionFragment.setWrongAnswer(amountOfAnswers[1]);
         QuestionFragment.setTransitTime(transitTime);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.statistics_menu);
+        toolbar.setOnMenuItemClickListener((Toolbar.OnMenuItemClickListener) item -> {
+            switch (item.getItemId()) {
+                case R.id.statistics:
+                    Intent intent = new Intent(this, QuestionActivity.class);
+                    startActivity(intent);
+                    finish();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        });
     }
 
     public void setupPieChart() {
