@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
@@ -45,10 +46,14 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     private String userAnswer;
     private static long transitTime;
 
+    private static int counterOfPrompt = 3;
+    private static int counterOfFriendsAnswer = 1;
+
     private static int correctAnswer;
     private static int wrongAnswer;
     private static int finishTimeQuestion;
     private static int unansweredQuestion = QuestionActivity.getAmountOfQuestions();
+    private boolean isAnswered = false;
 
     static final String QUESTION = "QUESTION";
 
@@ -97,6 +102,10 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     return true;
                 case R.id.prompt:
                     showTwoAnswers();
+                    return true;
+                case R.id.friend:
+                    showFriendAnswer();
+                    return true;
                 default:
                     return super.onOptionsItemSelected(item);
             }
@@ -104,28 +113,59 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    private void showFriendAnswer() {
+        if (counterOfFriendsAnswer > 0 && isAnswered) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("I think it's " + trueAnswer.getName());
+            builder.setPositiveButton("Ok", (dialog, which) -> {
+                if (firstButton.getText().equals(trueAnswer.getName())) {
+                    firstButton.setTextColor(Color.YELLOW);
+                }
+                if (secondButton.getText().equals(trueAnswer.getName())) {
+                    secondButton.setTextColor(Color.YELLOW);
+                }
+                if (thirdButton.getText().equals(trueAnswer.getName())) {
+                    thirdButton.setTextColor(Color.YELLOW);
+                }
+                if (fourthButton.getText().equals(trueAnswer.getName())) {
+                    fourthButton.setTextColor(Color.YELLOW);
+                }
+                dialog.dismiss();
+            });
+            AlertDialog alert = builder.create();
+            alert.setCanceledOnTouchOutside(false);
+            alert.show();
+            counterOfFriendsAnswer--;
+        } else {
+            Toast.makeText(getContext(), "You no longer have help from a friend", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void showTwoAnswers() {
-        List<Answer> answers = new ArrayList<>(question.getAnswers());
-        answers.remove(trueAnswer);
-        int randomInt = (int) (2.0 * Math.random());
-        answers.remove(answers.get(randomInt));
-        for (Answer answer : answers) {
-            if (firstButton.getText().equals(answer.getName())) {
-                firstButton.setClickable(false);
-                firstButton.setTextColor(Color.RED);
+        if (counterOfPrompt > 0 && isAnswered) {
+            List<Answer> answers = new ArrayList<>(question.getAnswers());
+            answers.remove(trueAnswer);
+            int randomInt = (int) (2.0 * Math.random());
+            answers.remove(answers.get(randomInt));
+            for (Answer answer : answers) {
+                if (firstButton.getText().equals(answer.getName())) {
+                    firstButton.setClickable(false);
+                    firstButton.setTextColor(Color.RED);
+                } else if (secondButton.getText().equals(answer.getName())) {
+                    secondButton.setClickable(false);
+                    secondButton.setTextColor(Color.RED);
+                } else if (thirdButton.getText().equals(answer.getName())) {
+                    thirdButton.setClickable(false);
+                    thirdButton.setTextColor(Color.RED);
+                } else if (fourthButton.getText().equals(answer.getName())) {
+                    fourthButton.setClickable(false);
+                    fourthButton.setTextColor(Color.RED);
+                }
             }
-             else if (secondButton.getText().equals(answer.getName())) {
-                secondButton.setClickable(false);
-                secondButton.setTextColor(Color.RED);
-            }
-            else if (thirdButton.getText().equals(answer.getName())) {
-                thirdButton.setClickable(false);
-                thirdButton.setTextColor(Color.RED);
-            }
-            else if (fourthButton.getText().equals(answer.getName())) {
-                fourthButton.setClickable(false);
-                fourthButton.setTextColor(Color.RED);
-            }
+            counterOfPrompt--;
+            Toast.makeText(getContext(), "You have " + counterOfPrompt + " prompt.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getContext(), "You have no more prompt.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -143,7 +183,6 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         builder.setNegativeButton("Cancel", (dialog, which) -> {
         });
         AlertDialog alertDialog = builder.create();
-
         alertDialog.setCanceledOnTouchOutside(false);
         alertDialog.show();
     }
@@ -314,6 +353,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     firstButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                isAnswered
                 secondButton.setTextColor(Color.WHITE);
                 thirdButton.setTextColor(Color.WHITE);
                 fourthButton.setTextColor(Color.WHITE);
