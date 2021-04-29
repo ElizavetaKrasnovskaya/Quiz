@@ -354,6 +354,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     wrongAnswer++;
                 }
                 secondButton.setTextColor(Color.WHITE);
+
                 thirdButton.setTextColor(Color.WHITE);
                 fourthButton.setTextColor(Color.WHITE);
                 unansweredQuestion--;
