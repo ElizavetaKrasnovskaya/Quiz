@@ -353,7 +353,6 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     firstButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
-                isAnswered
                 secondButton.setTextColor(Color.WHITE);
                 thirdButton.setTextColor(Color.WHITE);
                 fourthButton.setTextColor(Color.WHITE);
