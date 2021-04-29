@@ -2,6 +2,7 @@ package com.bsuir.quiz.adapter;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
@@ -39,6 +41,8 @@ import java.util.Locale;
 
 public class QuestionFragment extends Fragment implements View.OnClickListener {
 
+    private OnButtonClickListener mOnButtonClickListener;
+
     private long countdownInMillisS = (long) -1;
     private CountDownTimer countDownTimer;
     private long timeLeftInMillis;
@@ -46,8 +50,8 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     private String userAnswer;
     private static long transitTime;
 
-    private static int counterOfPrompt = 3;
-    private static int counterOfFriendsAnswer = 1;
+    private static int counterOfPrompt;
+    private static int counterOfFriendsAnswer;
 
     private static int correctAnswer;
     private static int wrongAnswer;
@@ -68,10 +72,25 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     public QuestionFragment() {
     }
 
+    public interface OnButtonClickListener{
+        void onButtonClicked(View view);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            mOnButtonClickListener = (OnButtonClickListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(((QuestionActivity) context).getLocalClassName()
+                    + " must implement OnButtonClickListener");
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -114,7 +133,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showFriendAnswer() {
-        if (counterOfFriendsAnswer > 0 && isAnswered) {
+        if (counterOfFriendsAnswer > 0 && !isAnswered) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             builder.setTitle("I think it's " + trueAnswer.getName());
             builder.setPositiveButton("Ok", (dialog, which) -> {
@@ -136,13 +155,15 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             alert.setCanceledOnTouchOutside(false);
             alert.show();
             counterOfFriendsAnswer--;
+        } else if (isAnswered) {
+            Toast.makeText(getContext(), "You have already answered.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getContext(), "You no longer have help from a friend", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showTwoAnswers() {
-        if (counterOfPrompt > 0 && isAnswered) {
+        if (counterOfPrompt > 0 && !isAnswered) {
             List<Answer> answers = new ArrayList<>(question.getAnswers());
             answers.remove(trueAnswer);
             int randomInt = (int) (2.0 * Math.random());
@@ -164,6 +185,8 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
             }
             counterOfPrompt--;
             Toast.makeText(getContext(), "You have " + counterOfPrompt + " prompt.", Toast.LENGTH_SHORT).show();
+        } else if (isAnswered) {
+            Toast.makeText(getContext(), "You have already answered.", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(getContext(), "You have no more prompt.", Toast.LENGTH_SHORT).show();
         }
@@ -314,12 +337,14 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                 timeLeftInMillis = 0;
                 updateCountDownText();
                 showTrueAnswer();
+                isAnswered = true;
                 finishTimeQuestion++;
                 firstButton.setClickable(false);
                 secondButton.setClickable(false);
                 thirdButton.setClickable(false);
                 fourthButton.setClickable(false);
                 transitTime += 30000;
+                mOnButtonClickListener.onButtonClicked(getView());
                 if ((correctAnswer + wrongAnswer + finishTimeQuestion) == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
@@ -353,8 +378,8 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     firstButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                isAnswered = true;
                 secondButton.setTextColor(Color.WHITE);
-
                 thirdButton.setTextColor(Color.WHITE);
                 fourthButton.setTextColor(Color.WHITE);
                 unansweredQuestion--;
@@ -370,15 +395,18 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
+                mOnButtonClickListener.onButtonClicked(view);
                 break;
             case R.id.button_2:
                 if (secondButton.getText().equals(trueAnswer.getName())) {
                     secondButton.setTextColor(Color.GREEN);
                     correctAnswer++;
+                    mOnButtonClickListener.onButtonClicked(view);
                 } else {
                     secondButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                isAnswered = true;
                 firstButton.setTextColor(Color.WHITE);
                 thirdButton.setTextColor(Color.WHITE);
                 fourthButton.setTextColor(Color.WHITE);
@@ -395,15 +423,18 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
+                mOnButtonClickListener.onButtonClicked(view);
                 break;
             case R.id.button_3:
                 if (thirdButton.getText().equals(trueAnswer.getName())) {
                     thirdButton.setTextColor(Color.GREEN);
                     correctAnswer++;
+                    mOnButtonClickListener.onButtonClicked(view);
                 } else {
                     thirdButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                isAnswered = true;
                 secondButton.setTextColor(Color.WHITE);
                 firstButton.setTextColor(Color.WHITE);
                 fourthButton.setTextColor(Color.WHITE);
@@ -420,15 +451,18 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
+                mOnButtonClickListener.onButtonClicked(view);
                 break;
             case R.id.button_4:
                 if (fourthButton.getText().equals(trueAnswer.getName())) {
                     correctAnswer++;
                     fourthButton.setTextColor(Color.GREEN);
+                    mOnButtonClickListener.onButtonClicked(view);
                 } else {
                     fourthButton.setTextColor(Color.RED);
                     wrongAnswer++;
                 }
+                isAnswered = true;
                 secondButton.setTextColor(Color.WHITE);
                 thirdButton.setTextColor(Color.WHITE);
                 firstButton.setTextColor(Color.WHITE);
@@ -445,6 +479,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                         || unansweredQuestion == QuestionActivity.getAmountOfQuestions()) {
                     showStatistic();
                 }
+                mOnButtonClickListener.onButtonClicked(view);
                 break;
         }
     }
@@ -486,8 +521,12 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public static int getFinishTimeQuestion() {
-        return finishTimeQuestion;
+    public static void setCounterOfPrompt(int counterOfPrompt) {
+        QuestionFragment.counterOfPrompt = counterOfPrompt;
+    }
+
+    public static void setCounterOfFriendsAnswer(int counterOfFriendsAnswer) {
+        QuestionFragment.counterOfFriendsAnswer = counterOfFriendsAnswer;
     }
 
     public static void setFinishTimeQuestion(int finishTimeQuestion) {
@@ -496,10 +535,6 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
 
     public static long getTransitTime() {
         return transitTime;
-    }
-
-    public static void setUnansweredQuestion(int unansweredQuestion) {
-        QuestionFragment.unansweredQuestion = unansweredQuestion;
     }
 
     public static void setCorrectAnswer(int correctAnswer) {

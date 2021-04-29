@@ -41,10 +41,4 @@ public class QuestionAdapter extends FragmentPagerAdapter {
         return amountOfQuestions;
     }
 
-    //
-//    @Nullable
-//    @Override
-//    public CharSequence getPageTitle(int position) {
-//        return String.valueOf(position + 1);
-//    }
 }
