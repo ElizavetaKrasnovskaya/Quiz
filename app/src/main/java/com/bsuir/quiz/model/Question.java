@@ -1,6 +1,8 @@
 package com.bsuir.quiz.model;
 
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -9,6 +11,7 @@ public class Question implements Serializable {
     private String url;
     private List<Answer> answers;
     private Long time = Long.valueOf(30000);
+    private Bitmap image;
 
     public Question() {
     }
@@ -16,6 +19,14 @@ public class Question implements Serializable {
     public Question(String url, List<Answer> answers) {
         this.url = url;
         this.answers = answers;
+    }
+
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
     }
 
     public String getUrl() {

@@ -9,5 +9,5 @@
     <color name="white">#2B2B2B</color>
     <color name="buttonAccentLight">#6ab7ff</color>
     <color name="buttonAccent">#1e88e5</color>
-
+    <color name="wh">#ffffff</color>
 </resources>

@@ -15,12 +15,13 @@ import com.bsuir.quiz.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.regex.Pattern;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText email;
     private EditText password;
     private FirebaseAuth firebaseAuth;
-    private FirebaseAuth.AuthStateListener authStateListener;
 
 
     @SuppressLint("WrongViewCast")
@@ -38,7 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         AppCompatImageButton signIn = findViewById(R.id.signin);
 
         firebaseAuth = FirebaseAuth.getInstance();
-        authStateListener = firebaseAuth -> {
+        FirebaseAuth.AuthStateListener authStateListener = firebaseAuth -> {
             FirebaseUser user = firebaseAuth.getCurrentUser();
             if (user != null) {
                 Log.d("Id", user.getUid());
@@ -70,18 +71,37 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signUp(String email, String password) {
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this, "Registration completed successfully",
-                                Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(LoginActivity.this, TopicActivity.class);
-                        startActivity(intent);
-                        finish();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Registration failed",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+        if (validate(email, password)) {
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(LoginActivity.this, "Registration completed successfully",
+                                    Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, TopicActivity.class);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Registration failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
+    }
+
+    private boolean validate(String email, String password) {
+        boolean isValid = true;
+        String regex = "^(.+)@(.+)$";
+        Pattern pattern = Pattern.compile(regex);
+        if (password.length() < 5 || password.length() > 15) {
+            Toast.makeText(LoginActivity.this, "Password should contains from 5 to 15 characters",
+                    Toast.LENGTH_SHORT).show();
+            isValid = false;
+        }
+        if (!pattern.matcher(email).matches()) {
+            Toast.makeText(LoginActivity.this, "Incorrect email",
+                    Toast.LENGTH_SHORT).show();
+            isValid = false;
+        }
+        return isValid;
     }
 }

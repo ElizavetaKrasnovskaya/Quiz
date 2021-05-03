@@ -7,9 +7,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,6 +33,10 @@ import com.bsuir.quiz.ui.PieChartActivity;
 import com.bsuir.quiz.ui.QuestionActivity;
 import com.bsuir.quiz.ui.TopicActivity;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -38,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class QuestionFragment extends Fragment implements View.OnClickListener {
 
@@ -52,6 +60,8 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
 
     private static int counterOfPrompt;
     private static int counterOfFriendsAnswer;
+    private boolean promptUsed = false;
+    private boolean friendsAnswerUsed = false;
 
     private static int correctAnswer;
     private static int wrongAnswer;
@@ -61,18 +71,19 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
 
     static final String QUESTION = "QUESTION";
 
-    private Question question;
+    public Question question;
     private Answer trueAnswer;
     private Button firstButton;
     private Button secondButton;
     private Button thirdButton;
     private Button fourthButton;
+    private ImageView imageView;
 
 
     public QuestionFragment() {
     }
 
-    public interface OnButtonClickListener{
+    public interface OnButtonClickListener {
         void onButtonClicked(View view);
     }
 
@@ -123,7 +134,11 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     showTwoAnswers();
                     return true;
                 case R.id.friend:
-                    showFriendAnswer();
+                    try {
+                        showFriendAnswer();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     return true;
                 default:
                     return super.onOptionsItemSelected(item);
@@ -132,38 +147,53 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    private void showFriendAnswer() {
-        if (counterOfFriendsAnswer > 0 && !isAnswered) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-            builder.setTitle("I think it's " + trueAnswer.getName());
-            builder.setPositiveButton("Ok", (dialog, which) -> {
-                if (firstButton.getText().equals(trueAnswer.getName())) {
-                    firstButton.setTextColor(Color.YELLOW);
-                }
-                if (secondButton.getText().equals(trueAnswer.getName())) {
-                    secondButton.setTextColor(Color.YELLOW);
-                }
-                if (thirdButton.getText().equals(trueAnswer.getName())) {
-                    thirdButton.setTextColor(Color.YELLOW);
-                }
-                if (fourthButton.getText().equals(trueAnswer.getName())) {
-                    fourthButton.setTextColor(Color.YELLOW);
-                }
-                dialog.dismiss();
-            });
-            AlertDialog alert = builder.create();
-            alert.setCanceledOnTouchOutside(false);
-            alert.show();
-            counterOfFriendsAnswer--;
-        } else if (isAnswered) {
-            Toast.makeText(getContext(), "You have already answered.", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getContext(), "You no longer have help from a friend", Toast.LENGTH_SHORT).show();
-        }
+    private void showFriendAnswer() throws IOException {
+//        if (counterOfFriendsAnswer > 0 && !isAnswered && !promptUsed && !friendsAnswerUsed) {
+//            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//            builder.setTitle("I think it's " + trueAnswer.getName());
+//            builder.setPositiveButton("Ok", (dialog, which) -> {
+//                if (firstButton.getText().equals(trueAnswer.getName())) {
+//                    firstButton.setTextColor(Color.YELLOW);
+//                }
+//                if (secondButton.getText().equals(trueAnswer.getName())) {
+//                    secondButton.setTextColor(Color.YELLOW);
+//                }
+//                if (thirdButton.getText().equals(trueAnswer.getName())) {
+//                    thirdButton.setTextColor(Color.YELLOW);
+//                }
+//                if (fourthButton.getText().equals(trueAnswer.getName())) {
+//                    fourthButton.setTextColor(Color.YELLOW);
+//                }
+//                dialog.dismiss();
+//            });
+//            AlertDialog alert = builder.create();
+//            alert.setCanceledOnTouchOutside(false);
+//            alert.show();
+//            counterOfFriendsAnswer--;
+//            friendsAnswerUsed = true;
+//        } else if (friendsAnswerUsed) {
+//            Toast.makeText(getContext(), "You have already answered.", Toast.LENGTH_SHORT).show();
+//        } else if (promptUsed) {
+//            Toast.makeText(getContext(), "You have already used friends answer.", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(getContext(), "You no longer have help from a friend", Toast.LENGTH_SHORT).show();
+//        }
+        final Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("image/*");
+        File file = new File(getContext().getCacheDir(), "friend");
+        file.createNewFile();
+        Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
+        byte[] bitmapdata = bos.toByteArray();
+        FileOutputStream fos = new FileOutputStream(file);
+        fos.write(bitmapdata);
+        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+        startActivity(Intent.createChooser(shareIntent, "Share image using"));
     }
 
     private void showTwoAnswers() {
-        if (counterOfPrompt > 0 && !isAnswered) {
+        if (counterOfPrompt > 0 && !isAnswered && !promptUsed && !friendsAnswerUsed) {
             List<Answer> answers = new ArrayList<>(question.getAnswers());
             answers.remove(trueAnswer);
             int randomInt = (int) (2.0 * Math.random());
@@ -183,8 +213,11 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     fourthButton.setTextColor(Color.RED);
                 }
             }
+            promptUsed = true;
             counterOfPrompt--;
             Toast.makeText(getContext(), "You have " + counterOfPrompt + " prompt.", Toast.LENGTH_SHORT).show();
+        } else if (promptUsed) {
+            Toast.makeText(getContext(), "You have already used prompt.", Toast.LENGTH_SHORT).show();
         } else if (isAnswered) {
             Toast.makeText(getContext(), "You have already answered.", Toast.LENGTH_SHORT).show();
         } else {
@@ -267,7 +300,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     }
 
     private void displayValues(View view, String url) {
-        ImageView imageView = view.findViewById(R.id.image);
+        imageView = view.findViewById(R.id.image);
         firstButton = view.findViewById(R.id.button_1);
         secondButton = view.findViewById(R.id.button_2);
         thirdButton = view.findViewById(R.id.button_3);
