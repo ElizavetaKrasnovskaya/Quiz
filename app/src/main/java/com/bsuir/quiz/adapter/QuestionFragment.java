@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -178,18 +180,15 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
 //        } else {
 //            Toast.makeText(getContext(), "You no longer have help from a friend", Toast.LENGTH_SHORT).show();
 //        }
-        final Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("image/*");
-        File file = new File(getContext().getCacheDir(), "friend");
-        file.createNewFile();
-        Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 0, bos);
-        byte[] bitmapdata = bos.toByteArray();
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(bitmapdata);
-        shareIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-        startActivity(Intent.createChooser(shareIntent, "Share image using"));
+        final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(Intent.EXTRA_TEXT, "Help me with question. What is it? " + question.getUrl() + "\n" +
+                "1) " + question.getAnswers().get(0).getName() + "\n" +
+                "2) " + question.getAnswers().get(1).getName() +"\n" +
+                "3) " + question.getAnswers().get(2).getName() +"\n" +
+                "4) " + question.getAnswers().get(3).getName());
+        intent.setType("image/png");
+        startActivity(Intent.createChooser(intent, "Share image via"));
     }
 
     private void showTwoAnswers() {
