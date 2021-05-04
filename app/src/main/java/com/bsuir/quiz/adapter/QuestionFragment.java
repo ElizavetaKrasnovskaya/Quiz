@@ -136,15 +136,18 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showFriendAnswer() {
-        final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Intent.EXTRA_TEXT, "Help me with question. What is it? " + question.getUrl() + "\n" +
-                "1) " + question.getAnswers().get(0).getName() + "\n" +
-                "2) " + question.getAnswers().get(1).getName() + "\n" +
-                "3) " + question.getAnswers().get(2).getName() + "\n" +
-                "4) " + question.getAnswers().get(3).getName());
-        intent.setType("image/png");
-        startActivity(Intent.createChooser(intent, "Share image via"));
+        if (counterOfFriendsAnswer > 0 && !isAnswered && !friendsAnswerUsed && !promptUsed) {
+            friendsAnswerUsed = true;
+            final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(Intent.EXTRA_TEXT, "Help me with question. What is it? " + question.getUrl() + "\n" +
+                    "1) " + question.getAnswers().get(0).getName() + "\n" +
+                    "2) " + question.getAnswers().get(1).getName() + "\n" +
+                    "3) " + question.getAnswers().get(2).getName() + "\n" +
+                    "4) " + question.getAnswers().get(3).getName());
+            intent.setType("image/png");
+            startActivity(Intent.createChooser(intent, "Share image via"));
+        }
     }
 
     private void showTwoAnswers() {
