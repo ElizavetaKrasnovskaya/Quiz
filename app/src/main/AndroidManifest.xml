@@ -17,22 +17,17 @@
         <activity
             android:name=".ui.PieChartActivity"
             android:parentActivityName=".ui.TopicActivity" />
-
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2799186949781090~9835347947" />
-
         <activity android:name=".ui.QuestionActivity" />
         <activity android:name=".ui.TopicActivity" />
         <activity android:name=".ui.LoginActivity" />
         <activity android:name=".ui.SplashActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
