@@ -6,15 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,10 +30,6 @@ import com.bsuir.quiz.ui.PieChartActivity;
 import com.bsuir.quiz.ui.QuestionActivity;
 import com.bsuir.quiz.ui.TopicActivity;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
@@ -47,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 public class QuestionFragment extends Fragment implements View.OnClickListener {
 
@@ -136,11 +126,7 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
                     showTwoAnswers();
                     return true;
                 case R.id.friend:
-                    try {
-                        showFriendAnswer();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    showFriendAnswer();
                     return true;
                 default:
                     return super.onOptionsItemSelected(item);
@@ -149,43 +135,13 @@ public class QuestionFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
-    private void showFriendAnswer() throws IOException {
-//        if (counterOfFriendsAnswer > 0 && !isAnswered && !promptUsed && !friendsAnswerUsed) {
-//            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-//            builder.setTitle("I think it's " + trueAnswer.getName());
-//            builder.setPositiveButton("Ok", (dialog, which) -> {
-//                if (firstButton.getText().equals(trueAnswer.getName())) {
-//                    firstButton.setTextColor(Color.YELLOW);
-//                }
-//                if (secondButton.getText().equals(trueAnswer.getName())) {
-//                    secondButton.setTextColor(Color.YELLOW);
-//                }
-//                if (thirdButton.getText().equals(trueAnswer.getName())) {
-//                    thirdButton.setTextColor(Color.YELLOW);
-//                }
-//                if (fourthButton.getText().equals(trueAnswer.getName())) {
-//                    fourthButton.setTextColor(Color.YELLOW);
-//                }
-//                dialog.dismiss();
-//            });
-//            AlertDialog alert = builder.create();
-//            alert.setCanceledOnTouchOutside(false);
-//            alert.show();
-//            counterOfFriendsAnswer--;
-//            friendsAnswerUsed = true;
-//        } else if (friendsAnswerUsed) {
-//            Toast.makeText(getContext(), "You have already answered.", Toast.LENGTH_SHORT).show();
-//        } else if (promptUsed) {
-//            Toast.makeText(getContext(), "You have already used friends answer.", Toast.LENGTH_SHORT).show();
-//        } else {
-//            Toast.makeText(getContext(), "You no longer have help from a friend", Toast.LENGTH_SHORT).show();
-//        }
+    private void showFriendAnswer() {
         final Intent intent = new Intent(android.content.Intent.ACTION_SEND);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra(Intent.EXTRA_TEXT, "Help me with question. What is it? " + question.getUrl() + "\n" +
                 "1) " + question.getAnswers().get(0).getName() + "\n" +
-                "2) " + question.getAnswers().get(1).getName() +"\n" +
-                "3) " + question.getAnswers().get(2).getName() +"\n" +
+                "2) " + question.getAnswers().get(1).getName() + "\n" +
+                "3) " + question.getAnswers().get(2).getName() + "\n" +
                 "4) " + question.getAnswers().get(3).getName());
         intent.setType("image/png");
         startActivity(Intent.createChooser(intent, "Share image via"));
