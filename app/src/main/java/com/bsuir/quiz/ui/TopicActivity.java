@@ -14,6 +14,7 @@ import com.bsuir.quiz.R;
 import com.bsuir.quiz.adapter.TopicAdapter;
 import com.bsuir.quiz.model.Answer;
 import com.bsuir.quiz.model.Question;
+import com.bsuir.quiz.model.Score;
 import com.bsuir.quiz.model.Topic;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
@@ -33,6 +34,7 @@ public class TopicActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private List<Topic> topics;
     private TopicAdapter adapter;
+    private static List<Score> topUsers;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,7 @@ public class TopicActivity extends AppCompatActivity {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         recyclerView = findViewById(R.id.recycler_view);
         topics = new ArrayList<>();
+        topUsers = new ArrayList<>();
 
         MobileAds.initialize(getApplicationContext());
         AdView adView = findViewById(R.id.adView);
@@ -55,6 +58,10 @@ public class TopicActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     topics.clear();
+                    for (DataSnapshot sn : snapshot.child("Score").child("user").getChildren()) {
+                        Score score = sn.getValue(Score.class);
+                        topUsers.add(score);
+                    }
                     for (DataSnapshot sn : snapshot.getChildren()) {
                         String name = sn.child("name").getValue(String.class);
                         String url = sn.child("url").getValue(String.class);
@@ -72,7 +79,9 @@ public class TopicActivity extends AppCompatActivity {
                             questions.add(question);
                         }
                         topic = new Topic(name, url, questions);
-                        topics.add(topic);
+                        if (topic.getName() != null) {
+                            topics.add(topic);
+                        }
                     }
                     adapter = new TopicAdapter(topics, getApplicationContext());
                     recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -97,5 +106,13 @@ public class TopicActivity extends AppCompatActivity {
         recyclerView.setLayoutAnimation(layoutAnimationController);
         recyclerView.getAdapter().notifyDataSetChanged();
         recyclerView.scheduleLayoutAnimation();
+    }
+
+    public static List<Score> getTopUsers() {
+        return topUsers;
+    }
+
+    public static void setTopUsers(List<Score> topUsers) {
+        TopicActivity.topUsers = topUsers;
     }
 }
